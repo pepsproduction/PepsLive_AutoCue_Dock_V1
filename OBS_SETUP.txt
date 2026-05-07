@@ -18,7 +18,7 @@ OBS SETUP GUIDE
    PepsLive AutoCue Dock
 
    URL:
-   https://pepsproduction.github.io/pepslive-dock/PepsLive_AutoCue_Dock_V1.html
+   https://pepsproduction.github.io/PepsLive_AutoCue_Dock_V1/
 
 6) ใน Dock:
    - กดรูปเฟือง

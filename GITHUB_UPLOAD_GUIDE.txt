@@ -1,24 +1,26 @@
-วิธีอัพ PepsLive AutoCue Dock V1 ขึ้น GitHub
+วิธีอัพ PepsLive AutoCue Dock V1 ขึ้น GitHub แบบให้ลิงก์สั้นเปิดหน้าโปรแกรมทันที
 
-1) แตกไฟล์ ZIP นี้ก่อน
+Repo:
+https://github.com/pepsproduction/PepsLive_AutoCue_Dock_V1
 
-2) เข้า GitHub repo:
-   https://github.com/pepsproduction/pepslive-dock
+ไฟล์ที่ต้องอัพ:
+- index.html
+- PepsLive_AutoCue_Dock_V1.html
+- README.md
+- OBS_SETUP.txt
+- VERSION.txt
+- .nojekyll
 
-3) กด:
-   Add file > Upload files
-
-4) ลากไฟล์ทั้งหมดในโฟลเดอร์นี้ขึ้นไป:
-   - PepsLive_AutoCue_Dock_V1.html
-   - README.md
-   - VERSION.txt
-   - OBS_SETUP.txt
-   - .nojekyll
-
+ขั้นตอน:
+1) แตกไฟล์ ZIP นี้
+2) เข้า repo บน GitHub
+3) กด Add file > Upload files
+4) ลากไฟล์ทั้งหมดในโฟลเดอร์นี้ขึ้นไป
 5) กด Commit changes
+6) รอสักครู่
+7) เปิดลิงก์:
+   https://pepsproduction.github.io/PepsLive_AutoCue_Dock_V1/
 
-6) รอสักครู่ แล้วเปิด URL:
-   https://pepsproduction.github.io/pepslive-dock/PepsLive_AutoCue_Dock_V1.html
-
-7) เอา URL นี้ไปใส่ใน OBS:
-   Docks > Custom Browser Docks
+สำคัญ:
+- ต้องมี index.html อยู่ที่หน้า root ของ repo
+- ถ้ามี README.md อย่างเดียว GitHub Pages อาจแสดงหน้า README แทนโปรแกรม

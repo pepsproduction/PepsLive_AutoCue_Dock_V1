@@ -1,18 +1,19 @@
 PepsLive AutoCue Dock V1
-Build: GitHub Ready Package
-Created: 2026-05-07 08:14:30
+Build: Index Ready Package
+Created: 2026-05-07 08:19:07
 
-Main File:
+Main URL file:
+index.html
+
+Backup direct file:
 PepsLive_AutoCue_Dock_V1.html
 
-Base Source:
+Source base:
 pepslive_source_timer_dock_v4_scenejump_fixed.html
 
 Features:
+- GitHub Pages root URL opens program directly
 - Source Timer แยก Source / เวลาเปิด / เวลาปิด
 - เพิ่ม Source Row ได้เอง
-- Hide All Sources ตอนออกจาก Target Scene
 - Auto Scene Jump ทำงานซ้ำได้ตลอดจนกว่าจะปิด checkbox
-- Theme Orange / Black ให้เข้ากับ PepsLive Dock V1
-- OBS WebSocket Settings อยู่ใน Popup
-- Log อยู่ใน Popup
+- Orange / Black theme for PepsLive Dock style
