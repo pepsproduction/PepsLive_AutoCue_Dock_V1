@@ -1,0 +1,33 @@
+OBS SETUP GUIDE
+
+1) เปิด OBS
+
+2) เปิด OBS WebSocket:
+   Tools > WebSocket Server Settings
+
+3) ตั้งค่า:
+   Enable WebSocket Server = ON
+   Server Port = 4455
+   Enable Authentication = OFF
+
+4) เพิ่ม Dock:
+   Docks > Custom Browser Docks
+
+5) ใส่:
+   Dock Name:
+   PepsLive AutoCue Dock
+
+   URL:
+   https://pepsproduction.github.io/pepslive-dock/PepsLive_AutoCue_Dock_V1.html
+
+6) ใน Dock:
+   - กดรูปเฟือง
+   - กด Connect
+   - เลือก Target Scene
+   - กด Reload
+   - เพิ่ม Source และตั้งเวลา
+
+หมายเหตุ:
+- ถ้า Source ไม่ขึ้น ให้เช็คว่า Source นั้นอยู่ใน Target Scene จริง
+- ถ้า OBS WebSocket เปิด Authentication ให้ใส่ Password ใน Dock ด้วย
+- Auto Scene Jump จะทำงานตลอดจนกว่าจะเอาติ๊กเปิดใช้งานออก
