@@ -1,0 +1,1359 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PepsLive Source Timer Dock V4</title>
+  <style>
+    :root{
+      /* PepsLive Dock V1 tone: Orange / Black */
+      --bg:#080808;
+      --panel:#101010;
+      --panel2:#151515;
+      --panel3:#0c0c0c;
+      --stroke:#2a2a2a;
+      --stroke2:#3a3a3a;
+      --text:#fff7ed;
+      --muted:#b9afa4;
+      --soft:#f5e7d6;
+      --orange:#ff7a18;
+      --orange2:#ff9f1c;
+      --amber:#ffc15a;
+      --green:#31d084;
+      --yellow:#ffd166;
+      --red:#ff5d5d;
+      --shadow:0 18px 44px rgba(0,0,0,.48);
+      --r:18px;
+      --r2:13px;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(255,122,24,.20), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(255,159,28,.10), transparent 30%),
+        linear-gradient(145deg,#050505,#0b0b0c 58%,#111111);
+      color:var(--text);
+      font-family:Inter, "Segoe UI", Tahoma, system-ui, -apple-system, sans-serif;
+      font-size:13px;
+      overflow:hidden;
+    }
+
+    button,input,select{font:inherit}
+
+    .app{
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      min-width:300px;
+    }
+
+    .topbar{
+      position:sticky;
+      top:0;
+      z-index:50;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:10px 10px 8px;
+      background:rgba(7,7,7,.94);
+      backdrop-filter:blur(14px);
+      border-bottom:1px solid rgba(255,122,24,.34);
+      box-shadow:0 10px 26px rgba(0,0,0,.35);
+    }
+
+    .brand{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+
+    .brand-title{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      font-weight:900;
+      letter-spacing:.35px;
+      white-space:nowrap;
+      text-transform:uppercase;
+    }
+
+    .brand-dot{
+      width:9px;
+      height:9px;
+      border-radius:50%;
+      background:linear-gradient(135deg,var(--orange),var(--amber));
+      box-shadow:0 0 18px rgba(255,122,24,.9);
+      flex:0 0 auto;
+    }
+
+    .brand-sub{
+      color:var(--muted);
+      font-size:11px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:210px;
+    }
+
+    .top-actions{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      flex:0 0 auto;
+    }
+
+    .status{
+      display:flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(255,122,24,.32);
+      color:var(--amber);
+      background:rgba(255,122,24,.12);
+      font-size:11px;
+      white-space:nowrap;
+      max-width:130px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+
+    .status.ok{
+      border-color:rgba(49,208,132,.44);
+      color:var(--green);
+      background:rgba(49,208,132,.11);
+    }
+
+    .status.bad{
+      border-color:rgba(255,93,93,.42);
+      color:var(--red);
+      background:rgba(255,93,93,.12);
+    }
+
+    .status .led{
+      width:7px;
+      height:7px;
+      border-radius:50%;
+      background:currentColor;
+      box-shadow:0 0 12px currentColor;
+      flex:0 0 auto;
+    }
+
+    .icon-btn{
+      width:34px;
+      height:34px;
+      padding:0;
+      border-radius:12px;
+      border:1px solid rgba(255,122,24,.35);
+      color:var(--soft);
+      background:linear-gradient(145deg,#1a1a1a,#0e0e0f);
+      cursor:pointer;
+    }
+
+    .icon-btn:hover{
+      border-color:var(--orange);
+      box-shadow:0 0 0 2px rgba(255,122,24,.10);
+    }
+
+    .main{
+      overflow:auto;
+      padding:10px;
+    }
+
+    .card{
+      border:1px solid rgba(255,122,24,.20);
+      background:linear-gradient(145deg,rgba(18,18,18,.96),rgba(11,11,11,.96));
+      border-radius:var(--r);
+      box-shadow:0 10px 24px rgba(0,0,0,.34);
+      margin-bottom:10px;
+      overflow:hidden;
+    }
+
+    .card-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:10px 11px 8px;
+      border-bottom:1px solid rgba(255,122,24,.16);
+      background:linear-gradient(90deg,rgba(255,122,24,.16),rgba(255,159,28,.04));
+    }
+
+    .card-title{
+      font-size:13px;
+      font-weight:900;
+      margin:0;
+      display:flex;
+      align-items:center;
+      gap:7px;
+      white-space:nowrap;
+      text-transform:uppercase;
+      letter-spacing:.22px;
+    }
+
+    .tag{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:20px;
+      height:20px;
+      padding:0 7px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:900;
+      color:#090909;
+      background:linear-gradient(135deg,var(--orange),var(--amber));
+      box-shadow:0 0 16px rgba(255,122,24,.22);
+    }
+
+    .card-body{
+      padding:10px;
+    }
+
+    label{
+      display:block;
+      color:var(--muted);
+      font-size:11px;
+      margin:0 0 4px;
+      line-height:1.3;
+    }
+
+    input,select{
+      width:100%;
+      height:36px;
+      border:1px solid #303030;
+      border-radius:12px;
+      outline:none;
+      padding:7px 9px;
+      color:var(--text);
+      background:#090909;
+      min-width:0;
+    }
+
+    select{cursor:pointer}
+
+    input:focus,select:focus{
+      border-color:var(--orange);
+      box-shadow:0 0 0 2px rgba(255,122,24,.14);
+    }
+
+    button{
+      border:1px solid rgba(255,122,24,.33);
+      border-radius:12px;
+      padding:8px 10px;
+      background:linear-gradient(145deg,#191919,#0d0d0d);
+      color:var(--text);
+      cursor:pointer;
+      font-weight:800;
+      min-height:36px;
+    }
+
+    button:hover{
+      border-color:var(--orange);
+      box-shadow:0 0 0 2px rgba(255,122,24,.08);
+    }
+
+    button.good{
+      border-color:rgba(255,122,24,.60);
+      color:#111;
+      background:linear-gradient(135deg,var(--orange),var(--amber));
+    }
+
+    button.danger{
+      border-color:rgba(255,93,93,.42);
+      background:linear-gradient(145deg,#351414,#160909);
+      color:#ffe1e1;
+    }
+
+    button.ghost{
+      background:#0b0b0b;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(12,1fr);
+      gap:8px;
+      align-items:end;
+    }
+
+    .c2{grid-column:span 2}
+    .c3{grid-column:span 3}
+    .c4{grid-column:span 4}
+    .c5{grid-column:span 5}
+    .c6{grid-column:span 6}
+    .c7{grid-column:span 7}
+    .c8{grid-column:span 8}
+    .c12{grid-column:span 12}
+
+    .checks{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .check{
+      display:flex;
+      align-items:flex-start;
+      gap:8px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.35;
+    }
+
+    .check input{
+      width:16px;
+      height:16px;
+      margin-top:1px;
+      flex:0 0 auto;
+      accent-color:var(--orange);
+    }
+
+    .rules{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+
+    .rule-row{
+      display:grid;
+      grid-template-columns:1fr 76px 76px 34px;
+      gap:7px;
+      align-items:end;
+      padding:8px;
+      border:1px solid rgba(255,122,24,.17);
+      border-radius:15px;
+      background:linear-gradient(145deg,rgba(23,23,23,.96),rgba(9,9,9,.96));
+    }
+
+    .rule-row .mini-input input{
+      text-align:center;
+      padding-left:5px;
+      padding-right:5px;
+    }
+
+    .remove{
+      width:34px;
+      min-height:36px;
+      padding:0;
+      font-size:17px;
+    }
+
+    .mini-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+      margin-top:9px;
+    }
+
+    .help{
+      color:var(--muted);
+      font-size:11px;
+      line-height:1.5;
+      margin-top:7px;
+    }
+
+    .divider{
+      height:1px;
+      background:rgba(255,122,24,.15);
+      margin:10px 0;
+    }
+
+    .jump-box{
+      border:1px solid rgba(255,122,24,.22);
+      background:linear-gradient(145deg,rgba(255,122,24,.10),rgba(12,12,12,.96));
+      border-radius:15px;
+      padding:9px;
+    }
+
+    .small-line{
+      font-size:11px;
+      color:var(--muted);
+      margin-top:6px;
+      line-height:1.45;
+    }
+
+    .modal-backdrop{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:12px;
+      background:rgba(0,0,0,.66);
+      backdrop-filter:blur(7px);
+      z-index:999;
+    }
+
+    .modal-backdrop.show{display:flex}
+
+    .modal{
+      width:min(560px,100%);
+      max-height:min(86vh,720px);
+      overflow:hidden;
+      display:flex;
+      flex-direction:column;
+      background:linear-gradient(145deg,#121212,#080808);
+      border:1px solid rgba(255,122,24,.28);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+    }
+
+    .modal-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+      padding:12px;
+      border-bottom:1px solid rgba(255,122,24,.18);
+      background:linear-gradient(90deg,rgba(255,122,24,.17),rgba(255,159,28,.04));
+    }
+
+    .modal-title{
+      font-weight:900;
+      font-size:14px;
+      margin:0;
+      text-transform:uppercase;
+      letter-spacing:.2px;
+    }
+
+    .modal-body{
+      overflow:auto;
+      padding:12px;
+    }
+
+    .log{
+      height:180px;
+      overflow:auto;
+      white-space:pre-wrap;
+      background:#050505;
+      border:1px solid #2f2f2f;
+      border-radius:13px;
+      padding:10px;
+      color:#f0e5d5;
+      font-size:12px;
+      line-height:1.45;
+    }
+
+    .tabs{
+      display:flex;
+      gap:6px;
+      margin-bottom:10px;
+    }
+
+    .tab{
+      flex:1;
+      min-height:34px;
+      padding:7px 8px;
+      background:#080808;
+    }
+
+    .tab.active{
+      border-color:var(--orange);
+      color:#111;
+      background:linear-gradient(135deg,var(--orange),var(--amber));
+    }
+
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    @media(max-width:430px){
+      .brand-sub{max-width:150px}
+      .status{max-width:95px;padding:6px 7px}
+      .main{padding:8px}
+      .grid{grid-template-columns:repeat(6,1fr)}
+      .c2,.c3,.c4,.c5,.c6,.c7,.c8,.c12{grid-column:span 6}
+      .rule-row{
+        grid-template-columns:1fr 62px 62px 32px;
+        gap:6px;
+        padding:7px;
+      }
+      .rule-row label{font-size:10px}
+      input,select,button{
+        height:34px;
+        min-height:34px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-title"><span class="brand-dot"></span><span>PEPS LIVE PRODUCTION</span></div>
+        <div class="brand-sub">Source Timer / Persistent Scene Jump V4</div>
+      </div>
+
+      <div class="top-actions">
+        <div id="status" class="status"><span class="led"></span><span id="statusText">ยังไม่เชื่อม</span></div>
+        <button id="openSettingsBtn" class="icon-btn" title="Settings / Log">⚙</button>
+      </div>
+    </div>
+
+    <div class="main">
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="tag">1</span> Source Timer</h2>
+          <button id="refreshBtn" class="ghost">Reload</button>
+        </div>
+        <div class="card-body">
+          <div class="grid">
+            <div class="c8">
+              <label>Target Scene / Scene หลักที่เข้าแล้วเริ่มจับเวลา</label>
+              <select id="targetScene"></select>
+            </div>
+            <div class="c4">
+              <label>&nbsp;</label>
+              <button id="testStartBtn">Test</button>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div id="rules" class="rules"></div>
+
+          <div class="mini-actions">
+            <button id="addRowBtn" class="good">+ Add Source</button>
+            <button id="hideAllBtn" class="danger">Hide All</button>
+          </div>
+
+          <div class="help">
+            เปิดหลังเข้า Scene = วินาทีที่ Source จะเปิดเอง<br>
+            ปิดหลังเปิด = แสดงนานกี่วิแล้วปิดเอง, ใส่ 0 คือเปิดค้างจนย้าย Scene
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="hideOnEnter" checked> เข้า Target Scene แล้วปิด Source ในรายการก่อน</label>
+            <label class="check"><input type="checkbox" id="hideOnLeave" checked> ย้ายออกจาก Target Scene แล้วปิด Source ในรายการทั้งหมด</label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2 class="card-title"><span class="tag">2</span> Auto Scene Jump</h2>
+          <label class="check" style="margin:0"><input type="checkbox" id="autoJumpEnabled"> เปิดใช้งาน</label>
+        </div>
+        <div class="card-body">
+          <div class="jump-box">
+            <div class="grid">
+              <div class="c7">
+                <label>Scene Jump / Scene ที่กดไปแล้วให้กลับเอง</label>
+                <select id="jumpScene"></select>
+              </div>
+              <div class="c5">
+                <label>อยู่กี่วินาที</label>
+                <input id="jumpSeconds" type="number" min="0" step="0.1" value="5">
+              </div>
+            </div>
+
+            <div class="small-line">
+              เมื่อติ๊กเปิดใช้งาน: ถ้าแบงค์กด Scene ไปที่ Scene Jump เองใน OBS ระบบจะรอเวลาที่ตั้งไว้ แล้วกลับมาที่ Target Scene อัตโนมัติ
+            </div>
+          </div>
+
+          <div class="mini-actions">
+            <button id="manualJumpBtn" class="ghost">Test Jump</button>
+            <button id="saveBtn" class="ghost">Save</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 class="modal-title">Settings / OBS WebSocket / Log</h3>
+        <button id="closeSettingsBtn" class="icon-btn" title="Close">×</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="tabs">
+          <button class="tab active" data-tab="connection">OBS</button>
+          <button class="tab" data-tab="log">Log</button>
+        </div>
+
+        <div id="tab-connection" class="tab-panel active">
+          <div class="grid">
+            <div class="c6">
+              <label>Host</label>
+              <input id="host" value="127.0.0.1">
+            </div>
+            <div class="c3">
+              <label>Port</label>
+              <input id="port" type="number" value="4455">
+            </div>
+            <div class="c3">
+              <label>&nbsp;</label>
+              <button id="connectBtn" class="good">Connect</button>
+            </div>
+            <div class="c12">
+              <label>Password ถ้า OBS เปิด Authentication</label>
+              <input id="password" type="password" placeholder="เว้นว่างได้ ถ้าปิด Authentication">
+            </div>
+          </div>
+
+          <div class="help">
+            OBS: Tools &gt; WebSocket Server Settings<br>
+            แนะนำ: Enable WebSocket Server = ON, Port = 4455, Enable Authentication = OFF ถ้าใช้เครื่องตัวเอง
+          </div>
+        </div>
+
+        <div id="tab-log" class="tab-panel">
+          <div id="log" class="log"></div>
+          <div class="mini-actions">
+            <button id="clearLogBtn" class="ghost">Clear Log</button>
+            <button id="copyLogBtn" class="ghost">Copy Log</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+
+  const els = {
+    status: $('status'),
+    statusText: $('statusText'),
+
+    openSettingsBtn: $('openSettingsBtn'),
+    closeSettingsBtn: $('closeSettingsBtn'),
+    settingsModal: $('settingsModal'),
+
+    host: $('host'),
+    port: $('port'),
+    password: $('password'),
+    connectBtn: $('connectBtn'),
+
+    refreshBtn: $('refreshBtn'),
+    targetScene: $('targetScene'),
+    rules: $('rules'),
+    addRowBtn: $('addRowBtn'),
+    saveBtn: $('saveBtn'),
+    testStartBtn: $('testStartBtn'),
+    hideAllBtn: $('hideAllBtn'),
+    hideOnEnter: $('hideOnEnter'),
+    hideOnLeave: $('hideOnLeave'),
+
+    autoJumpEnabled: $('autoJumpEnabled'),
+    jumpScene: $('jumpScene'),
+    jumpSeconds: $('jumpSeconds'),
+    manualJumpBtn: $('manualJumpBtn'),
+
+    log: $('log'),
+    clearLogBtn: $('clearLogBtn'),
+    copyLogBtn: $('copyLogBtn')
+  };
+
+  let ws = null;
+  let requestId = 1;
+  let pending = new Map();
+  let scenes = [];
+  let sceneItems = [];
+  let sourceMap = new Map();
+
+  let connected = false;
+  let currentScene = '';
+  let lastScene = '';
+
+  let timelineTimers = [];
+  let pollTimer = null;
+  let jumpTimer = null;
+
+  const storageKey = 'pepslive_source_timer_dock_v2';
+
+  function setStatus(text, mode = '') {
+    els.statusText.textContent = text;
+    els.status.className = 'status' + (mode ? ' ' + mode : '');
+  }
+
+  function log(message) {
+    const time = new Date().toLocaleTimeString();
+    els.log.textContent += `[${time}] ${message}\n`;
+    els.log.scrollTop = els.log.scrollHeight;
+  }
+
+  function openSettings(tab = 'connection') {
+    els.settingsModal.classList.add('show');
+    setTab(tab);
+  }
+
+  function closeSettings() {
+    els.settingsModal.classList.remove('show');
+  }
+
+  function setTab(name) {
+    document.querySelectorAll('.tab').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === name);
+    });
+    document.querySelectorAll('.tab-panel').forEach(panel => {
+      panel.classList.toggle('active', panel.id === 'tab-' + name);
+    });
+  }
+
+  function reqId() {
+    return 'req_' + Date.now() + '_' + (requestId++);
+  }
+
+  async function sha256Base64(text) {
+    const data = new TextEncoder().encode(text);
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    const bytes = Array.from(new Uint8Array(hash));
+    let binary = '';
+    for (const b of bytes) binary += String.fromCharCode(b);
+    return btoa(binary);
+  }
+
+  async function buildAuth(password, salt, challenge) {
+    const secret = await sha256Base64(password + salt);
+    return await sha256Base64(secret + challenge);
+  }
+
+  function sendRaw(obj) {
+    ws.send(JSON.stringify(obj));
+  }
+
+  function request(requestType, requestData = {}) {
+    if (!connected) return Promise.reject(new Error('ยังไม่ได้เชื่อม OBS'));
+
+    const id = reqId();
+    const payload = {
+      op: 6,
+      d: { requestType, requestId: id, requestData }
+    };
+
+    return new Promise((resolve, reject) => {
+      pending.set(id, { resolve, reject, requestType });
+      sendRaw(payload);
+
+      setTimeout(() => {
+        if (pending.has(id)) {
+          pending.delete(id);
+          reject(new Error('Request timeout: ' + requestType));
+        }
+      }, 6500);
+    });
+  }
+
+  function saveSettings(silent = false) {
+    const data = {
+      host: els.host.value,
+      port: els.port.value,
+      targetScene: els.targetScene.value,
+      hideOnEnter: els.hideOnEnter.checked,
+      hideOnLeave: els.hideOnLeave.checked,
+      autoJumpEnabled: els.autoJumpEnabled.checked,
+      jumpScene: els.jumpScene.value,
+      jumpSeconds: els.jumpSeconds.value,
+      rows: getRows()
+    };
+
+    localStorage.setItem(storageKey, JSON.stringify(data));
+    if (!silent) log('บันทึก Settings แล้ว');
+  }
+
+  function loadSettings() {
+    try {
+      const raw = localStorage.getItem(storageKey);
+      if (!raw) return null;
+
+      const data = JSON.parse(raw);
+
+      if (data.host) els.host.value = data.host;
+      if (data.port) els.port.value = data.port;
+      if (typeof data.hideOnEnter === 'boolean') els.hideOnEnter.checked = data.hideOnEnter;
+      if (typeof data.hideOnLeave === 'boolean') els.hideOnLeave.checked = data.hideOnLeave;
+      if (typeof data.autoJumpEnabled === 'boolean') els.autoJumpEnabled.checked = data.autoJumpEnabled;
+      if (data.jumpSeconds) els.jumpSeconds.value = data.jumpSeconds;
+
+      return data;
+    } catch {
+      return null;
+    }
+  }
+
+  function secondsToMs(value) {
+    const n = Number(value);
+    if (!Number.isFinite(n) || n < 0) return 0;
+    return Math.round(n * 1000);
+  }
+
+  function clearTimeline() {
+    timelineTimers.forEach(t => clearTimeout(t));
+    timelineTimers = [];
+  }
+
+  function addTimelineTimer(fn, ms) {
+    const timer = setTimeout(fn, ms);
+    timelineTimers.push(timer);
+    return timer;
+  }
+
+  function clearJumpTimer() {
+    if (jumpTimer) {
+      clearTimeout(jumpTimer);
+      jumpTimer = null;
+    }
+  }
+
+  function makeOption(value, label) {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = label || value;
+    return opt;
+  }
+
+  function getRows() {
+    const rows = [];
+
+    document.querySelectorAll('.rule-row').forEach(row => {
+      const sourceName = row.querySelector('.sourceSelect').value;
+      const showAfter = parseFloat(row.querySelector('.showAfter').value || '0');
+      const hideAfter = parseFloat(row.querySelector('.hideAfter').value || '0');
+
+      if (sourceName) rows.push({ sourceName, showAfter, hideAfter });
+    });
+
+    return rows;
+  }
+
+  function createRuleRow(data = {}) {
+    const row = document.createElement('div');
+    row.className = 'rule-row';
+
+    const sourceBox = document.createElement('div');
+    const sourceLabel = document.createElement('label');
+    sourceLabel.textContent = 'Source';
+    const sourceSelect = document.createElement('select');
+    sourceSelect.className = 'sourceSelect';
+
+    sceneItems.forEach(item => {
+      sourceSelect.appendChild(makeOption(item.sourceName));
+    });
+
+    if (data.sourceName && [...sourceSelect.options].some(o => o.value === data.sourceName)) {
+      sourceSelect.value = data.sourceName;
+    }
+
+    sourceSelect.addEventListener('change', () => saveSettings(true));
+    sourceBox.appendChild(sourceLabel);
+    sourceBox.appendChild(sourceSelect);
+
+    const showBox = document.createElement('div');
+    showBox.className = 'mini-input';
+    const showLabel = document.createElement('label');
+    showLabel.textContent = 'เปิด';
+    const showInput = document.createElement('input');
+    showInput.className = 'showAfter';
+    showInput.type = 'number';
+    showInput.min = '0';
+    showInput.step = '0.1';
+    showInput.value = data.showAfter ?? 0;
+    showInput.addEventListener('change', () => saveSettings(true));
+    showBox.appendChild(showLabel);
+    showBox.appendChild(showInput);
+
+    const hideBox = document.createElement('div');
+    hideBox.className = 'mini-input';
+    const hideLabel = document.createElement('label');
+    hideLabel.textContent = 'ปิด';
+    const hideInput = document.createElement('input');
+    hideInput.className = 'hideAfter';
+    hideInput.type = 'number';
+    hideInput.min = '0';
+    hideInput.step = '0.1';
+    hideInput.value = data.hideAfter ?? 0;
+    hideInput.addEventListener('change', () => saveSettings(true));
+    hideBox.appendChild(hideLabel);
+    hideBox.appendChild(hideInput);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove danger';
+    removeBtn.textContent = '×';
+    removeBtn.title = 'ลบ Source Row';
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      saveSettings(true);
+    });
+
+    row.appendChild(sourceBox);
+    row.appendChild(showBox);
+    row.appendChild(hideBox);
+    row.appendChild(removeBtn);
+
+    els.rules.appendChild(row);
+  }
+
+  function rebuildRuleRows(savedRows = null) {
+    const oldRows = savedRows || getRows();
+    els.rules.innerHTML = '';
+
+    if (oldRows.length) {
+      oldRows.forEach(row => createRuleRow(row));
+    } else {
+      createRuleRow({ showAfter: 0, hideAfter: 0 });
+    }
+  }
+
+  function rebuildSceneSelects(saved = {}) {
+    const prevTarget = saved.targetScene || els.targetScene.value;
+    const prevJump = saved.jumpScene || els.jumpScene.value;
+
+    [els.targetScene, els.jumpScene].forEach(select => {
+      select.innerHTML = '';
+      scenes.forEach(sceneName => select.appendChild(makeOption(sceneName)));
+    });
+
+    if (scenes.includes(prevTarget)) els.targetScene.value = prevTarget;
+    if (scenes.includes(prevJump)) els.jumpScene.value = prevJump;
+  }
+
+  function rebuildSourceMap() {
+    sourceMap = new Map();
+
+    sceneItems.forEach(item => {
+      sourceMap.set(item.sourceName, item.sceneItemId);
+    });
+  }
+
+  async function identify(hello) {
+    const payload = { rpcVersion: 1 };
+    const auth = hello.d && hello.d.authentication;
+
+    if (auth) {
+      const password = els.password.value || '';
+
+      if (!password) {
+        throw new Error('OBS เปิด Authentication อยู่ ต้องใส่ Password หรือปิด Authentication');
+      }
+
+      payload.authentication = await buildAuth(password, auth.salt, auth.challenge);
+    }
+
+    sendRaw({ op: 1, d: payload });
+  }
+
+  async function connect() {
+    try {
+      if (ws) ws.close();
+
+      connected = false;
+      setStatus('กำลังเชื่อม', '');
+      log('กำลังเชื่อม OBS WebSocket...');
+
+      const url = `ws://${els.host.value}:${els.port.value}`;
+      ws = new WebSocket(url);
+
+      ws.onopen = () => log('เปิด WebSocket แล้ว รอ Hello จาก OBS');
+
+      ws.onmessage = async (event) => {
+        const msg = JSON.parse(event.data);
+
+        if (msg.op === 0) {
+          try {
+            await identify(msg);
+          } catch (err) {
+            setStatus('เชื่อมไม่ได้', 'bad');
+            log(err.message);
+            ws.close();
+          }
+          return;
+        }
+
+        if (msg.op === 2) {
+          connected = true;
+          setStatus('เชื่อมต่อแล้ว', 'ok');
+          log('เชื่อมต่อ OBS สำเร็จ');
+
+          await refreshAll();
+          startPolling();
+          saveSettings(true);
+          return;
+        }
+
+        if (msg.op === 7) {
+          const id = msg.d.requestId;
+          const p = pending.get(id);
+          if (!p) return;
+
+          pending.delete(id);
+
+          if (msg.d.requestStatus && msg.d.requestStatus.result) {
+            p.resolve(msg.d.responseData || {});
+          } else {
+            const comment = msg.d.requestStatus ? msg.d.requestStatus.comment : 'Unknown request error';
+            p.reject(new Error(`${p.requestType}: ${comment}`));
+          }
+        }
+      };
+
+      ws.onerror = () => {
+        setStatus('Error', 'bad');
+        log('WebSocket Error: ตรวจว่า OBS เปิด WebSocket Server แล้วหรือยัง');
+      };
+
+      ws.onclose = () => {
+        connected = false;
+        setStatus('หลุด', 'bad');
+        clearTimeline();
+        clearJumpTimer();
+        if (pollTimer) clearInterval(pollTimer);
+        pollTimer = null;
+        log('ปิดการเชื่อมต่อ OBS WebSocket');
+      };
+
+    } catch (err) {
+      setStatus('เชื่อมไม่ได้', 'bad');
+      log(err.message);
+    }
+  }
+
+  async function refreshAll() {
+    const saved = loadSettings() || {};
+
+    const sceneList = await request('GetSceneList');
+    scenes = (sceneList.scenes || []).map(s => s.sceneName);
+    currentScene = sceneList.currentProgramSceneName || '';
+    lastScene = currentScene;
+
+    rebuildSceneSelects(saved);
+
+    if (saved.targetScene && scenes.includes(saved.targetScene)) {
+      els.targetScene.value = saved.targetScene;
+    }
+
+    if (saved.jumpScene && scenes.includes(saved.jumpScene)) {
+      els.jumpScene.value = saved.jumpScene;
+    }
+
+    await refreshSceneItems(saved.rows || null);
+
+    log(`โหลด Scene สำเร็จ: ${scenes.length} Scene`);
+  }
+
+  async function refreshSceneItems(savedRows = null) {
+    if (!els.targetScene.value) return;
+
+    const res = await request('GetSceneItemList', { sceneName: els.targetScene.value });
+
+    sceneItems = (res.sceneItems || []).map(item => ({
+      sourceName: item.sourceName,
+      sceneItemId: item.sceneItemId,
+      sceneItemEnabled: item.sceneItemEnabled
+    }));
+
+    rebuildSourceMap();
+    rebuildRuleRows(savedRows);
+
+    log(`โหลด Source จาก "${els.targetScene.value}" สำเร็จ: ${sceneItems.length} Source`);
+  }
+
+  async function getCurrentScene() {
+    const res = await request('GetCurrentProgramScene');
+    return res.currentProgramSceneName || '';
+  }
+
+  async function setCurrentScene(sceneName) {
+    await request('SetCurrentProgramScene', { sceneName });
+  }
+
+  async function setSourceVisible(sourceName, enabled) {
+    const sceneName = els.targetScene.value;
+    const sceneItemId = sourceMap.get(sourceName);
+
+    if (!sceneName || sceneItemId === undefined) {
+      log(`หา Source ไม่เจอใน Target Scene: ${sourceName}`);
+      return;
+    }
+
+    await request('SetSceneItemEnabled', {
+      sceneName,
+      sceneItemId,
+      sceneItemEnabled: !!enabled
+    });
+
+    log(`${enabled ? 'Show' : 'Hide'}: ${sourceName}`);
+  }
+
+  async function hideAllListedSources() {
+    const rows = getRows();
+
+    for (const row of rows) {
+      if (!row.sourceName) continue;
+
+      try {
+        await setSourceVisible(row.sourceName, false);
+      } catch (err) {
+        log(err.message);
+      }
+    }
+  }
+
+  async function startTimeline() {
+    clearTimeline();
+
+    if (els.hideOnEnter.checked) {
+      await hideAllListedSources();
+    }
+
+    const target = els.targetScene.value;
+    const rows = getRows();
+
+    if (!target || !rows.length) return;
+
+    log(`เริ่ม Source Timer: ${target}`);
+
+    rows.forEach(row => {
+      const showMs = secondsToMs(row.showAfter);
+      const hideMs = secondsToMs(row.hideAfter);
+
+      addTimelineTimer(async () => {
+        try {
+          const sceneNow = await getCurrentScene();
+          if (sceneNow !== target) return;
+
+          await setSourceVisible(row.sourceName, true);
+
+          if (hideMs > 0) {
+            addTimelineTimer(async () => {
+              try {
+                const stillScene = await getCurrentScene();
+                if (stillScene === target) {
+                  await setSourceVisible(row.sourceName, false);
+                }
+              } catch (err) {
+                log(err.message);
+              }
+            }, hideMs);
+          }
+        } catch (err) {
+          log(err.message);
+        }
+      }, showMs);
+    });
+  }
+
+  async function handleAutoJump(sceneName, previousScene) {
+    /*
+      Auto Scene Jump V4
+      ทำงานทุกครั้งที่ผู้ใช้กดไปยัง Jump Scene
+      และจะทำซ้ำได้ตลอดจนกว่าจะเอาติ๊ก "เปิดใช้งาน" ออก
+
+      หลักการ:
+      - ถ้า Scene ปัจจุบันไม่ใช่ Jump Scene จะไม่ตั้ง timer
+      - ถ้าเข้า Jump Scene จะตั้ง timer ใหม่ทุกครั้ง
+      - พอครบเวลา ถ้ายังอยู่ Jump Scene จริง ค่อยกลับ Target Scene
+      - ถ้าผู้ใช้เปลี่ยน Scene เองก่อนครบเวลา จะยกเลิก ไม่ดึงกลับมั่ว
+    */
+
+    clearJumpTimer();
+
+    if (!els.autoJumpEnabled.checked) return;
+
+    const jumpScene = els.jumpScene.value;
+    const returnScene = els.targetScene.value;
+    const seconds = parseFloat(els.jumpSeconds.value || '5');
+    const delayMs = secondsToMs(seconds);
+
+    if (!jumpScene || !returnScene) return;
+    if (jumpScene === returnScene) return;
+    if (sceneName !== jumpScene) return;
+
+    log(`Auto Scene Jump: เข้า ${jumpScene} แล้วรอ ${seconds} วิ ก่อนกลับ ${returnScene}`);
+
+    jumpTimer = setTimeout(async () => {
+      try {
+        const now = await getCurrentScene();
+
+        if (now === jumpScene && els.autoJumpEnabled.checked) {
+          await setCurrentScene(returnScene);
+          log(`Auto Scene Jump: กลับ ${returnScene}`);
+        } else {
+          log('Auto Scene Jump: ยกเลิก เพราะผู้ใช้เปลี่ยน Scene เองก่อนครบเวลา');
+        }
+      } catch (err) {
+        log(err.message);
+      }
+    }, delayMs);
+  }
+
+  async function handleSceneChange(sceneName) {
+    const target = els.targetScene.value;
+    const previous = lastScene;
+
+    if (sceneName === target && previous !== target) {
+      await startTimeline();
+    }
+
+    if (previous === target && sceneName !== target) {
+      clearTimeline();
+
+      if (els.hideOnLeave.checked) {
+        await hideAllListedSources();
+      }
+
+      log(`ออกจาก Target Scene: ${target}`);
+    }
+
+    await handleAutoJump(sceneName, previous);
+
+    lastScene = sceneName;
+  }
+
+  function startPolling() {
+    if (pollTimer) clearInterval(pollTimer);
+
+    pollTimer = setInterval(async () => {
+      if (!connected) return;
+
+      try {
+        currentScene = await getCurrentScene();
+
+        if (currentScene !== lastScene) {
+          await handleSceneChange(currentScene);
+        }
+      } catch (err) {
+        log(err.message);
+      }
+    }, 350);
+  }
+
+  async function manualJumpTest() {
+    try {
+      if (!connected) {
+        log('ยังไม่ได้เชื่อม OBS');
+        return;
+      }
+
+      const jumpScene = els.jumpScene.value;
+      const returnScene = els.targetScene.value;
+      const seconds = parseFloat(els.jumpSeconds.value || '5');
+      const delayMs = secondsToMs(seconds);
+
+      if (!jumpScene || !returnScene || jumpScene === returnScene) {
+        log('ตั้งค่า Scene Jump ไม่ถูกต้อง');
+        return;
+      }
+
+      clearJumpTimer();
+
+      log(`Test Jump: ${returnScene} -> ${jumpScene} ${seconds} วิ`);
+      await setCurrentScene(jumpScene);
+
+      /*
+        ถ้าเปิด Auto Scene Jump อยู่ ให้ระบบ Auto เป็นคนพากลับ
+        เพื่อไม่ให้เกิด timer ซ้อนกัน
+      */
+      if (els.autoJumpEnabled.checked) {
+        return;
+      }
+
+      /*
+        ถ้าปิด Auto Scene Jump อยู่ ปุ่ม Test Jump ยังใช้ทดสอบแบบครั้งเดียวได้
+      */
+      jumpTimer = setTimeout(async () => {
+        try {
+          const now = await getCurrentScene();
+
+          if (now === jumpScene) {
+            await setCurrentScene(returnScene);
+            log(`Test Jump: กลับ ${returnScene}`);
+          }
+        } catch (err) {
+          log(err.message);
+        }
+      }, delayMs);
+
+    } catch (err) {
+      log(err.message);
+    }
+  }
+
+  els.openSettingsBtn.addEventListener('click', () => openSettings('connection'));
+  els.closeSettingsBtn.addEventListener('click', closeSettings);
+
+  els.settingsModal.addEventListener('click', (ev) => {
+    if (ev.target === els.settingsModal) closeSettings();
+  });
+
+  document.querySelectorAll('.tab').forEach(btn => {
+    btn.addEventListener('click', () => setTab(btn.dataset.tab));
+  });
+
+  els.connectBtn.addEventListener('click', connect);
+
+  els.refreshBtn.addEventListener('click', async () => {
+    try {
+      await refreshAll();
+      saveSettings(true);
+    } catch (err) {
+      log(err.message);
+    }
+  });
+
+  els.targetScene.addEventListener('change', async () => {
+    try {
+      clearTimeline();
+      clearJumpTimer();
+      await refreshSceneItems(null);
+      saveSettings(true);
+    } catch (err) {
+      log(err.message);
+    }
+  });
+
+  els.addRowBtn.addEventListener('click', () => {
+    createRuleRow({ showAfter: 0, hideAfter: 0 });
+    saveSettings(true);
+  });
+
+  els.saveBtn.addEventListener('click', () => saveSettings(false));
+  els.testStartBtn.addEventListener('click', startTimeline);
+  els.hideAllBtn.addEventListener('click', hideAllListedSources);
+  els.manualJumpBtn.addEventListener('click', manualJumpTest);
+
+  els.clearLogBtn.addEventListener('click', () => {
+    els.log.textContent = '';
+  });
+
+  els.copyLogBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(els.log.textContent);
+      log('Copy Log แล้ว');
+    } catch {
+      log('Copy Log ไม่สำเร็จ');
+    }
+  });
+
+  [
+    'hideOnEnter',
+    'hideOnLeave',
+    'autoJumpEnabled',
+    'jumpScene',
+    'jumpSeconds',
+    'host',
+    'port'
+  ].forEach(id => {
+    els[id].addEventListener('change', () => saveSettings(true));
+  });
+
+  const initial = loadSettings();
+
+  rebuildRuleRows(initial && initial.rows ? initial.rows : [{ showAfter: 0, hideAfter: 0 }]);
+
+  setStatus('ยังไม่เชื่อม', '');
+})();
+</script>
+</body>
+</html>

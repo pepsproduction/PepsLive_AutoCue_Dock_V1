@@ -1,0 +1,9 @@
+PepsLive AutoCue Dock V1
+Base file: pepslive_source_timer_dock_v4_scenejump_fixed.html
+GitHub filename: PepsLive_AutoCue_Dock_V1.html
+
+Features:
+- Source Timer แยก Source / เวลาเปิด / เวลาปิด
+- เพิ่มแถว Source ได้เอง
+- Auto Scene Jump ทำงานซ้ำได้ตลอดจนกว่าจะเอาติ๊กออก
+- Theme Orange / Black เข้ากับ PepsLive Dock V1
